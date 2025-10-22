@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>쿠폰 링크</title>
+<style>
+:root{ --bg:#0f1115; --card:#171a21; --text:#e8ecf1; --muted:#9aa4b2; --brand:#ff6b00; --stroke:#232b3a; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:440px;background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:20px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+h1{margin:0 0 6px;font-size:20px}
+p{margin:6px 0;color:var(--muted)}
+.link{display:inline-block;margin-top:14px;font-weight:900;text-decoration:underline;font-size:18px}
+.btn{display:block;width:100%;margin-top:12px;appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:900;cursor:pointer;background:var(--brand);color:#fff;font-size:16px}
+</style>
+</head>
+<body>
+<main class="card">
+<h1>링크가 준비되었어요 🎉</h1>
+<p>아래 링크 문구를 누르면 해당 페이지로 이동합니다.</p>
+<a id="deepLink" class="link" href="#" rel="noopener noreferrer" target="_blank">혜택 받으러 가기</a>
+<button id="go" class="btn">바로 이동</button>
+<p style="font-size:12px">※ 보안을 위해 실제 서비스에서는 서버에서 링크 유효성/1회성 검증을 권장합니다.</p>
+</main>
+<script>
+const p=new URLSearchParams(location.search);
+const url=p.get('url');
+const a=document.getElementById('deepLink');
+const go=document.getElementById('go');
+if(url){ a.href=url; go.addEventListener('click',()=>{ location.href=url; }); }
+else{ a.textContent='유효한 링크가 없습니다'; a.removeAttribute('href'); go.disabled=true; }
+</script>
+</body>
+</html>
