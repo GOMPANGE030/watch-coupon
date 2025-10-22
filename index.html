@@ -1,142 +1,162 @@
+<!-- 
+YouTube 시청 → 헤더에 [쿠폰받기] 노출 (10초 후 활성화)
+모바일 최적화, 16:9 플레이어, 하단 여백. 
+파일 2개(index.html, coupon.html)를 저장소 루트에 두고 그대로 배포하세요.
+-->
+
+========================
+index.html
+========================
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>쿠폰 받기 데모</title>
-<style>
-:root{
---brand:#ff6b00; --bg:#0f1115; --text:#e8ecf1; --muted:#9aa4b2; --card:#171a21; --stroke:#232b3a;
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-a{color:inherit;text-decoration:none}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>쿠폰 받기 데모</title>
+  <style>
+    :root{
+      --brand:#ff6b00; --bg:#0f1115; --text:#e8ecf1; --muted:#9aa4b2; --card:#171a21; --stroke:#232b3a;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    a{color:inherit;text-decoration:none}
 
+    /* 레이아웃 */
+    .shell{min-height:100dvh;display:flex;flex-direction:column}
+    .wrap{width:100%;max-width:720px;margin:0 auto;padding:0 16px}
 
-/* 레이아웃 */
-.shell{min-height:100dvh;display:flex;flex-direction:column}
-.wrap{width:100%;max-width:720px;margin:0 auto;padding:0 16px}
+    /* 헤더 */
+    header{position:sticky;top:0;z-index:10;background:rgba(15,17,21,.85);backdrop-filter:blur(6px);border-bottom:1px solid var(--stroke)}
+    .header{height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.2px}
+    .logo-badge{width:28px;height:28px;border-radius:8px;background:var(--brand);display:inline-flex;align-items:center;justify-content:center;color:#000;font-weight:900}
 
+    .btn{appearance:none;border:0;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer;font-size:15px}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn[disabled]{opacity:.5;cursor:not-allowed}
 
-/* 헤더 */
-header{position:sticky;top:0;z-index:10;background:rgba(15,17,21,.85);backdrop-filter:blur(6px);border-bottom:1px solid var(--stroke)}
-.header{height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.logo{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.2px}
-.logo-badge{width:28px;height:28px;border-radius:8px;background:var(--brand);display:inline-flex;align-items:center;justify-content:center;color:#000;font-weight:900}
+    /* 본문 카드 */
+    main{flex:1}
+    .card{background:var(--card);border:1px solid var(--stroke);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.25);margin:16px 0;padding:14px}
+    h1{font-size:18px;margin:0 0 8px}
+    .muted{color:var(--muted);font-size:14px}
 
+    /* 플레이어 16:9 */
+    .player-wrap{position:relative;border-radius:12px;overflow:hidden;background:#000;margin-top:10px}
+    .player{width:100%;aspect-ratio:16/9}
+    .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg, rgba(0,0,0,.6), rgba(0,0,0,.4));}
 
-.btn{appearance:none;border:0;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer;font-size:15px}
-.btn-primary{background:var(--brand);color:#fff}
-.btn[disabled]{opacity:.5;cursor:not-allowed}
+    /* 진행 바(얇게) */
+    .progress{height:8px;background:#1b212d;border:1px solid #222a3a;border-radius:999px;overflow:hidden;margin-top:12px}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--brand),#ffd29a)}
 
+    /* 하단 여백 */
+    .spacer{height:80px}
 
-/* 본문 카드 */
-main{flex:1}
-.card{background:var(--card);border:1px solid var(--stroke);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.25);margin:16px 0;padding:14px}
-h1{font-size:18px;margin:0 0 8px}
-.muted{color:var(--muted);font-size:14px}
-
-
-/* 플레이어 16:9 */
-.player-wrap{position:relative;border-radius:12px;overflow:hidden;background:#000;margin-top:10px}
-.player{width:100%;aspect-ratio:16/9}
-.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg, rgba(0,0,0,.6), rgba(0,0,0,.4));}
-
-
-/* 진행 바(얇게) */
-.progress{height:8px;background:#1b212d;border:1px solid #222a3a;border-radius:999px;overflow:hidden;margin-top:12px}
-.bar{height:100%;width:0;background:linear-gradient(90deg,var(--brand),#ffd29a)}
-
-
-/* 하단 여백 */
-.spacer{height:80px}
-
-
-@media (min-width:480px){
-.card{padding:18px}
-h1{font-size:20px}
-}
-</style>
+    @media (min-width:480px){
+      .card{padding:18px}
+      h1{font-size:20px}
+    }
+  </style>
 </head>
 <body>
-<div class="shell">
-<!-- 상단: 로고 | [쿠폰받기] (10초 전에 비활성/숨김) -->
-<header>
-<div class="wrap header">
-<div class="logo">
-<span class="logo-badge">★</span>
-<span>MY BRAND</span>
-</div>
-<button id="couponBtn" class="btn btn-primary" disabled title="영상 시청 후 활성화">쿠폰받기</button>
-</div>
-</header>
+  <div class="shell">
+    <!-- 상단: 로고 | [쿠폰받기] (10초 전에 비활성/숨김) -->
+    <header>
+      <div class="wrap header">
+        <div class="logo">
+          <span class="logo-badge">★</span>
+          <span>MY BRAND</span>
+        </div>
+        <button id="couponBtn" class="btn btn-primary" disabled title="영상 시청 후 활성화">쿠폰받기</button>
+      </div>
+    </header>
 
+    <!-- 중단: 영상(16:9) 카드 -->
+    <main class="wrap">
+      <section class="card">
+        <h1>영상 시청 후 쿠폰을 받아보세요</h1>
+        <p class="muted">영상 <strong id="needSec">10</strong>초 이상 시청하면 상단의 <strong>[쿠폰받기]</strong>가 활성화됩니다.</p>
 
-<!-- 중단: 영상(16:9) 카드 -->
-<main class="wrap">
-<section class="card">
-<h1>영상 시청 후 쿠폰을 받아보세요</h1>
-<p class="muted">영상 <strong id="needSec">10</strong>초 이상 시청하면 상단의 <strong>[쿠폰받기]</strong>가 활성화됩니다.</p>
+        <div class="player-wrap">
+          <div id="player" class="player"></div>
+          <div id="overlay" class="overlay">
+            <button id="startBtn" class="btn btn-primary" style="width:90%">▶︎ 시청 시작</button>
+          </div>
+        </div>
 
+        <div class="progress" aria-label="시청 진행률"><div id="bar" class="bar"></div></div>
+      </section>
 
-<div class="player-wrap">
-<div id="player" class="player"></div>
-<div id="overlay" class="overlay">
-<button id="startBtn" class="btn btn-primary" style="width:90%">▶︎ 시청 시작</button>
-</div>
-</div>
+      <div class="spacer"></div>
+    </main>
+  </div>
 
+  <script>
+    /******** 설정 ********/
+    const VIDEO_ID = "LtL4BLlLNko";           // 요청하신 영상 ID로 교체됨
+    const WATCH_THRESHOLD_SECONDS = 10;        // 요청: 10초
+    const COUPON_TARGET_URL = "https://example.com/promo"; // 실제 이동 링크로 교체
+    document.getElementById('needSec').textContent = WATCH_THRESHOLD_SECONDS;
 
-<div class="progress" aria-label="시청 진행률"><div id="bar" class="bar"></div></div>
-</section>
+    /******** 엘리먼트 ********/
+    const $ = s=>document.querySelector(s);
+    const overlay = $('#overlay');
+    const startBtn = $('#startBtn');
+    const bar = $('#bar');
+    const couponBtn = $('#couponBtn');
 
+    /******** YouTube IFrame API ********/
+    let player, apiReady=false, watchTimer=null;
+    let accumulated=0, lastTime=0, lastTickAt=0, rewarded=false;
 
-<div class="spacer"></div>
-</main>
-</div>
+    (function loadYT(){ const tag=document.createElement('script'); tag.src='https://www.youtube.com/iframe_api'; document.head.appendChild(tag); })();
+    window.onYouTubeIframeAPIReady=()=>{
+      apiReady=true;
+      player=new YT.Player('player',{
+        videoId:VIDEO_ID,
+        width:'100%',height:'100%',
+        playerVars:{controls:0,rel:0,fs:0,modestbranding:1,disablekb:1,playsinline:1},
+        events:{onReady, onStateChange}
+      });
+    };
 
+    function onReady(){ startBtn.disabled=false; }
 
-<script>
-/******** 설정 ********/
-const VIDEO_ID = "M7lc1UVf-VE"; // 테스트용 영상 ID
-const WATCH_THRESHOLD_SECONDS = 10; // 요청: 10초
-const COUPON_TARGET_URL = "https://example.com/promo"; // 실제 이동 링크로 교체
-document.getElementById('needSec').textContent = WATCH_THRESHOLD_SECONDS;
+    // 탭 이탈/포커스 아웃 시 정지
+    document.addEventListener('visibilitychange',()=>{ if(document.hidden && player?.pauseVideo){ player.pauseVideo(); }});
+    window.addEventListener('blur',()=>{ if(player?.pauseVideo){ player.pauseVideo(); }});
 
+    startBtn.addEventListener('click',()=>{ if(!apiReady) return; overlay.style.display='none'; try{ player.playVideo(); }catch(e){} });
 
-/******** 엘리먼트 ********/
-const $ = s=>document.querySelector(s);
-const overlay = $('#overlay');
-const startBtn = $('#startBtn');
-const bar = $('#bar');
-const couponBtn = $('#couponBtn');
+    function onStateChange(e){ const S=YT.PlayerState; if(e.data===S.PLAYING){ if(!watchTimer){ lastTime=player.getCurrentTime(); lastTickAt=performance.now(); watchTimer=setInterval(sample,250); }} else if(e.data===S.PAUSED||e.data===S.BUFFERING){ clearInterval(watchTimer); watchTimer=null; } else if(e.data===S.ENDED){ clearInterval(watchTimer); watchTimer=null; }}
 
+    function sample(){
+      const now=performance.now();
+      const ct=player.getCurrentTime();
+      const dt=(now-lastTickAt)/1000; // 경과
+      let dHead=ct-lastTime;
+      // 과도 점프 방지
+      if(dHead>dt+0.75){ player.seekTo(lastTime,true); return; }
+      if(dHead>0 && dHead<=dt+0.5){ accumulated+=Math.min(dHead,0.5); }
+      const need=WATCH_THRESHOLD_SECONDS; const done=Math.min(accumulated,need);
+      bar.style.width=`${(done/need)*100}%`;
+      if(!rewarded && accumulated>=need){
+        rewarded=true;
+        couponBtn.disabled=false; // 헤더 버튼 활성화
+        couponBtn.focus();
+      }
+      lastTime=ct; lastTickAt=now;
+    }
 
-/******** YouTube IFrame API ********/
-let player, apiReady=false, watchTimer=null;
-let accumulated=0, lastTime=0, lastTickAt=0, rewarded=false;
-
-
-(function loadYT(){ const tag=document.createElement('script'); tag.src='https://www.youtube.com/iframe_api'; document.head.appendChild(tag); })();
-window.onYouTubeIframeAPIReady=()=>{
-apiReady=true;
-player=new YT.Player('player',{
-videoId:VIDEO_ID,
-width:'100%',height:'100%',
-playerVars:{controls:0,rel:0,fs:0,modestbranding:1,disablekb:1,playsinline:1},
-events:{onReady, onStateChange}
-});
-};
-
-
-function onReady(){ startBtn.disabled=false; }
-
-
-// 탭 이탈/포커스 아웃 시 정지
-document.addEventListener('visibilitychange',()=>{ if(document.hidden && player?.pauseVideo){ player.pauseVideo(); }});
-window.addEventListener('blur',()=>{ if(player?.pauseVideo){ player.pauseVideo(); }});
-
-
-startBtn.addEventListener('click',()=>{ if(!apiReady) return; overlay.style.display='none'; try{ player.playVideo(); }catch(e){} });
-</html>
+    // 헤더 [쿠폰받기] 클릭 → 새 창에 coupon.html 띄우고 그 안에서 하이퍼링크로 이동
+    couponBtn.addEventListener('click',()=>{
+      if(couponBtn.disabled) return;
+      const url = `coupon.html?url=${encodeURIComponent(COUPON_TARGET_URL)}`;
+      const popup = window.open(url,'coupon','noopener,noreferrer,width=420,height=560');
+      if(!popup){ alert('브라우저에서 팝업이 차단되었습니다. 허용해 주세요.'); }
+    });
+  </script>
+</body>
+</html
