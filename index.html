@@ -1,246 +1,165 @@
+<!-- 
+YouTube 시청-쿠폰 발급 (팝업 새창 버전)
+설명: 시청 시간 달성 후 사용자가 버튼을 클릭해야 새 창이 열립니다(팝업 차단 회피).
+파일 구성: index.html + coupon.html 두 개를 같은 저장소 루트에 두세요.
+-->
+
+========================
+index.html
+========================
 <!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>시청 완료 후 쿠폰 발급</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>영상 시청 후 쿠폰 받기 (모바일 최적화)</title>
   <style>
-    :root{
-      --brand:#ff6b00;
-      --bg:#0f1115;
-      --text:#e8ecf1;
-      --muted:#a5adba;
-      --card:#171a21;
-      --ok:#22c55e;
-      --warn:#f59e0b;
-    }
-    *{box-sizing:border-box}
+    :root{ --brand:#ff6b00; --bg:#0f1115; --text:#e8ecf1; --muted:#a5adba; --card:#171a21; }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji}
-    .container{max-width:920px;margin:32px auto;padding:16px}
-    .card{background:var(--card);border:1px solid #212532;border-radius:16px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
-    h1{font-size:22px;margin:0 0 8px}
-    .muted{color:var(--muted)}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .container{max-width:640px;margin:0 auto;padding:16px}
+    .card{background:var(--card);border:1px solid #212532;border-radius:16px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+    h1{margin:0 0 8px;font-size:20px}
+    .muted{color:var(--muted);font-size:14px}
     .player-wrap{position:relative;border-radius:12px;overflow:hidden;background:#000}
     .player{width:100%;aspect-ratio:16/9}
-    .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg, rgba(0,0,0,.55), rgba(0,0,0,.35));}
-    .btn{appearance:none;border:0;border-radius:999px;padding:14px 22px;font-weight:700;cursor:pointer}
-    .btn-primary{background:var(--brand);color:#fff;box-shadow:0 8px 20px rgba(255,107,0,.35)}
+    .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg, rgba(0,0,0,.6), rgba(0,0,0,.4));}
+    .btn{appearance:none;border:0;border-radius:14px;padding:14px 18px;font-weight:700;cursor:pointer;width:100%;font-size:16px}
+    .btn-primary{background:var(--brand);color:#fff}
     .btn[disabled]{opacity:.5;cursor:not-allowed}
-    .row{display:flex;gap:16px;flex-wrap:wrap}
-    .grow{flex:1 1 340px}
-    .progress{height:10px;background:#232836;border-radius:999px;overflow:hidden}
+    .progress{height:10px;background:#232836;border-radius:999px;overflow:hidden;margin-top:12px}
     .bar{height:100%;width:0;background:linear-gradient(90deg,var(--brand),#ffd29a)}
-    .kpis{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
-    .pill{padding:8px 12px;border:1px solid #263044;border-radius:999px;background:#131722}
-    .pill.ok{border-color:#1f5130;background:#0e1b13;color:#9ef7b1}
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
-    .modal{background:var(--card);border:1px solid #2a3142;border-radius:16px;max-width:520px;width:100%;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.4)}
-    .coupon{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#0f151d;border:1px dashed #334155;color:#e2e8f0;padding:12px 14px;border-radius:12px;font-size:20px;letter-spacing:2px;text-align:center}
-    .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
-    .notice{font-size:12px;color:var(--muted);margin-top:10px}
-    .hidden{display:none}
+    .cta{margin-top:12px}
   </style>
 </head>
 <body>
   <div class="container">
     <div class="card">
       <h1>영상 시청 후 쿠폰 받기</h1>
-      <p class="muted">아래 유튜브 영상을 <strong id="needSec">50</strong>초 이상 시청하면 쿠폰이 발급됩니다. (탭을 벗어나면 일시정지돼요)</p>
+      <p class="muted">아래 유튜브 영상을 <strong id="needSec">10</strong>초 시청하면 쿠폰 링크를 받을 수 있어요.</p>
 
-      <div class="row">
-        <div class="grow">
-          <div class="player-wrap">
-            <div id="player" class="player"></div>
-            <div id="overlay" class="overlay">
-              <button id="startBtn" class="btn btn-primary">▶︎ 시청 시작</button>
-            </div>
-          </div>
-        </div>
-        <div style="flex:1 1 260px;min-width:240px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin:.5rem 0 .75rem">
-            <div class="muted">시청 진행률</div>
-            <div id="progressText" class="muted">0 / 50초</div>
-          </div>
-          <div class="progress" aria-label="시청 진행률">
-            <div id="bar" class="bar"></div>
-          </div>
-          <div class="kpis">
-            <div id="guardFocus" class="pill">포커스 감시: <strong>ON</strong></div>
-            <div id="guardSeek" class="pill">건너뛰기 방지: <strong>ON</strong></div>
-            <div id="status" class="pill">상태: <strong>대기</strong></div>
-          </div>
-          <div class="notice">※ 실제로 "시청했는지"는 브라우저 클라이언트 기준으로 검증됩니다. 보안이 중요한 배포 환경에서는 서버 검증을 추가하세요.</div>
+      <div class="player-wrap">
+        <div id="player" class="player"></div>
+        <div id="overlay" class="overlay">
+          <button id="startBtn" class="btn btn-primary">▶︎ 시청 시작</button>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- 완료 모달 -->
-  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal">
-      <h2 style="margin-top:0">축하합니다! 쿠폰이 발급되었습니다 🎉</h2>
-      <p class="muted" style="margin-top:4px">아래 코드를 복사해 결제 단계에서 입력해주세요.</p>
-      <div id="coupon" class="coupon" aria-live="polite">XXXX-XXXX-XXXX</div>
-      <div class="actions">
-        <button id="copyBtn" class="btn">복사</button>
-        <button id="closeBtn" class="btn btn-primary">닫기</button>
+      <div class="progress" aria-label="시청 진행률"><div id="bar" class="bar"></div></div>
+      <div class="cta">
+        <!-- 완료 후 나타나며, 사용자 클릭 시 새 창으로 이동 (팝업 차단 회피) -->
+        <button id="openPopupBtn" class="btn btn-primary" style="display:none">쿠폰 링크 받기</button>
       </div>
-      <div class="notice">이 코드는 예시입니다. 실제 배포 시 서버에서 일회용 쿠폰을 발급/검증하세요.</div>
+      <p class="muted" style="font-size:12px;margin-top:8px">※ 팝업은 버튼을 눌렀을 때만 열립니다. 자동 팝업은 브라우저에서 차단될 수 있어요.</p>
     </div>
   </div>
 
   <script>
-    /*********************************
-     * 설정 (필수 값만 바꿔 쓰세요)
-     *********************************/
-    const VIDEO_ID = "M7lc1UVf-VE"; // 임시 데모 영상 ID (YouTube API 공식 데모)
-    const WATCH_THRESHOLD_SECONDS = 50; // 쿠폰 발급까지 필요한 시청 시간(초)
-
-    // UI에 반영
+    /******** 설정 ********/
+    const VIDEO_ID = "M7lc1UVf-VE";  // 테스트용
+    const WATCH_THRESHOLD_SECONDS = 10; // 요청: 10초로 축소
+    const COUPON_TARGET_URL = "https://example.com/promo"; // 이동할 실제 링크로 교체
     document.getElementById('needSec').textContent = WATCH_THRESHOLD_SECONDS;
 
-    /*********************************
-     * 유틸
-     *********************************/
-    const $ = (sel) => document.querySelector(sel);
+    /******** 엘리먼트 ********/
+    const $ = s=>document.querySelector(s);
     const overlay = $('#overlay');
     const startBtn = $('#startBtn');
     const bar = $('#bar');
-    const progressText = $('#progressText');
-    const statusText = $('#status');
-    const modal = $('#modal');
-    const couponEl = $('#coupon');
+    const openPopupBtn = $('#openPopupBtn');
 
-    function setStatus(text){ statusText.innerHTML = `상태: <strong>${text}</strong>`; }
-    function fmt(s){ return Math.floor(s).toString(); }
-    function randCoupon(){
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      const block = () => Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join('');
-      return `${block()}-${block()}-${block()}`;
-    }
-
-    // 모달 컨트롤
-    function openModal(){ modal.style.display='flex'; }
-    function closeModal(){ modal.style.display='none'; }
-    $('#closeBtn').addEventListener('click', closeModal);
-    $('#copyBtn').addEventListener('click', async ()=>{
-      try{ await navigator.clipboard.writeText(couponEl.textContent.trim()); alert('복사되었습니다!'); }
-      catch(e){ alert('복사 실패. 수동으로 복사해주세요.'); }
-    });
-
-    /*********************************
-     * YouTube IFrame Player API 로드
-     *********************************/
+    /******** YouTube IFrame API ********/
     let player, apiReady=false, watchTimer=null;
-    let accumulated = 0;        // 누적 시청 시간(초)
-    let lastTime = 0;           // 직전 샘플의 플레이헤드 위치
-    let lastTickAt = 0;         // 직전 샘플의 타임스탬프(ms)
-    let rewarded = false;       // 쿠폰 발급 여부
+    let accumulated=0, lastTime=0, lastTickAt=0, rewarded=false;
 
-    // API 스크립트 주입
-    (function loadYT(){
-      const tag = document.createElement('script');
-      tag.src = "https://www.youtube.com/iframe_api";
-      document.head.appendChild(tag);
-    })();
-
-    // 전역 콜백 (YouTube가 호출)
-    window.onYouTubeIframeAPIReady = () => {
-      apiReady = true;
-      player = new YT.Player('player', {
-        videoId: VIDEO_ID,
-        width: '100%',
-        height: '100%',
-        playerVars: {
-          controls: 0,        // 컨트롤 숨김 (건너뛰기 방지)
-          rel: 0,
-          fs: 0,
-          modestbranding: 1,
-          disablekb: 1,       // 키보드 탐색 방지
-          playsinline: 1,
-          // mute: 1,        // 필요 시 자동재생 대비 무음 설정
-        },
-        events: {
-          onReady: onReady,
-          onStateChange: onStateChange,
-        }
+    (function loadYT(){ const tag=document.createElement('script'); tag.src='https://www.youtube.com/iframe_api'; document.head.appendChild(tag); })();
+    window.onYouTubeIframeAPIReady=()=>{
+      apiReady=true;
+      player=new YT.Player('player',{
+        videoId:VIDEO_ID,
+        width:'100%',height:'100%',
+        playerVars:{controls:0,rel:0,fs:0,modestbranding:1,disablekb:1,playsinline:1},
+        events:{onReady, onStateChange}
       });
     };
 
-    function onReady(){
-      setStatus('대기');
-      startBtn.disabled = false;
+    function onReady(){ startBtn.disabled=false; }
+
+    // 탭 이탈/포커스 아웃 시 정지 (시청 가장 근접 검증)
+    document.addEventListener('visibilitychange',()=>{ if(document.hidden && player?.pauseVideo){ player.pauseVideo(); }});
+    window.addEventListener('blur',()=>{ if(player?.pauseVideo){ player.pauseVideo(); }});
+
+    startBtn.addEventListener('click',()=>{ if(!apiReady) return; overlay.style.display='none'; try{ player.playVideo(); }catch(e){} });
+
+    function onStateChange(e){ const S=YT.PlayerState; if(e.data===S.PLAYING){ if(!watchTimer){ lastTime=player.getCurrentTime(); lastTickAt=performance.now(); watchTimer=setInterval(sample,250); }} else if(e.data===S.PAUSED||e.data===S.BUFFERING){ clearInterval(watchTimer); watchTimer=null; } else if(e.data===S.ENDED){ clearInterval(watchTimer); watchTimer=null; }}
+
+    function sample(){
+      const now=performance.now();
+      const ct=player.getCurrentTime();
+      const dt=(now-lastTickAt)/1000; // 경과
+      let dHead=ct-lastTime;
+      // 과도 점프 방지 (컨트롤 숨김 + 키보드 비활성화와 함께 사용)
+      if(dHead>dt+0.75){ player.seekTo(lastTime,true); return; }
+      if(dHead>0 && dHead<=dt+0.5){ accumulated+=Math.min(dHead,0.5); }
+      const need=WATCH_THRESHOLD_SECONDS; const done=Math.min(accumulated,need);
+      bar.style.width=`${(done/need)*100}%`;
+      if(!rewarded && accumulated>=need){
+        rewarded=true;
+        // 버튼 표시 → 클릭 시 새 창의 coupon.html로 이동, 그 페이지에서 실제 하이퍼링크 제공
+        openPopupBtn.style.display='block';
+        openPopupBtn.focus();
+      }
+      lastTime=ct; lastTickAt=now;
     }
 
-    // 가시성/포커스 감시: 탭을 벗어나면 일시정지
-    document.addEventListener('visibilitychange', () => {
-      if(document.hidden && player && player.pauseVideo){ player.pauseVideo(); setStatus('일시정지(탭 이탈)'); }
+    // 새 창 열기 (사용자 제스처 안에서만 호출해 팝업 차단 회피)
+    openPopupBtn.addEventListener('click',()=>{
+      const url = `coupon.html?url=${encodeURIComponent(COUPON_TARGET_URL)}`;
+      const popup = window.open(url,'coupon','noopener,noreferrer,width=420,height=560');
+      if(!popup){ alert('브라우저에서 팝업이 차단되었습니다. 허용해 주세요.'); }
     });
-    window.addEventListener('blur', () => { if(player && player.pauseVideo){ player.pauseVideo(); setStatus('일시정지(포커스 아웃)'); } });
+  </script>
+</body>
+</html>
 
-    // 시작 버튼
-    startBtn.addEventListener('click', async () => {
-      if(!apiReady) return;
-      overlay.style.display='none';
-      try { player.playVideo(); setStatus('재생 중'); } catch(e){ setStatus('재생 실패'); }
-    });
 
-    function onStateChange(e){
-      const YTS = YT.PlayerState;
-      if(e.data === YTS.PLAYING){
-        // 폴링 시작
-        if(!watchTimer){
-          lastTime = player.getCurrentTime();
-          lastTickAt = performance.now();
-          watchTimer = setInterval(sampleWatch, 250);
-        }
-      } else if(e.data === YTS.PAUSED || e.data === YTS.BUFFERING){
-        if(watchTimer){ clearInterval(watchTimer); watchTimer = null; }
-        if(e.data === YTS.PAUSED) setStatus('일시정지');
-      } else if(e.data === YTS.ENDED){
-        if(watchTimer){ clearInterval(watchTimer); watchTimer = null; }
-        setStatus('영상 종료');
-      }
-    }
-
-    // 시청 시간 샘플링/검증 루프
-    function sampleWatch(){
-      if(!player) return;
-      const now = performance.now();
-      const ct = player.getCurrentTime();
-      const dtWall = (now - lastTickAt) / 1000;       // 실제 경과 시간(초)
-      let dHead = ct - lastTime;                      // 헤드 이동(초)
-
-      // 사용자가 앞으로 크게 점프하면 되돌리기 (컨트롤 숨김 상태라 거의 없음)
-      if(dHead > dtWall + 0.75){
-        // 과도한 점프 탐지 → 허용치 초과 시 마지막 시점으로 복귀
-        player.seekTo(lastTime, true);
-        return;
-      }
-
-      // 정상 재생으로 판단되는 구간만 누적
-      if(dHead > 0 && dHead <= dtWall + 0.5){
-        accumulated += Math.min(dHead, 0.5); // 샘플링 간 과도 누적 방지
-      }
-
-      // UI 업데이트
-      const need = WATCH_THRESHOLD_SECONDS;
-      const clamped = Math.min(accumulated, need);
-      progressText.textContent = `${fmt(clamped)} / ${need}초`;
-      bar.style.width = `${(clamped/need)*100}%`;
-
-      // 발급 처리 (1회)
-      if(!rewarded && accumulated >= need){
-        rewarded = true;
-        setStatus('달성 완료');
-        couponEl.textContent = randCoupon();
-        openModal();
-      }
-
-      lastTime = ct;
-      lastTickAt = now;
-    }
+========================
+coupon.html
+========================
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>쿠폰 링크</title>
+  <style>
+    :root{ --bg:#0f1115; --card:#171a21; --text:#e8ecf1; --muted:#9aa4b2; --brand:#ff6b00; }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;display:flex;align-items:center;justify-content:center;padding:16px}
+    .card{width:100%;max-width:440px;background:var(--card);border:1px solid #232b3a;border-radius:16px;padding:20px;text-align:center}
+    h1{margin:0 0 6px;font-size:20px}
+    p{margin:6px 0;color:var(--muted)}
+    .link{display:inline-block;margin-top:14px;font-weight:800;text-decoration:underline;font-size:18px}
+    .btn{display:block;width:100%;margin-top:12px;appearance:none;border:0;border-radius:12px;padding:14px 16px;font-weight:800;cursor:pointer;background:var(--brand);color:#fff;font-size:16px}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>쿠폰 링크가 준비되었어요 🎉</h1>
+    <p>아래 링크 문구를 누르면 해당 페이지로 이동합니다.</p>
+    <a id="deepLink" class="link" href="#" rel="noopener noreferrer" target="_blank">혜택 받으러 가기</a>
+    <button id="go" class="btn">바로 이동</button>
+    <p style="font-size:12px">※ 보안을 위해 실제 서비스에서는 서버에서 링크 유효성/1회성 검증을 권장합니다.</p>
+  </main>
+  <script>
+    const p=new URLSearchParams(location.search);
+    const url=p.get('url');
+    const a=document.getElementById('deepLink');
+    const go=document.getElementById('go');
+    if(url){ a.href=url; go.addEventListener('click',()=>{ location.href=url; }); }
+    else{ a.textContent='유효한 링크가 없습니다'; a.removeAttribute('href'); go.disabled=true; }
   </script>
 </body>
 </html>
