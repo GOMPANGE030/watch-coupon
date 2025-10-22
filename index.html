@@ -67,4 +67,76 @@ h1{font-size:20px}
 <div class="logo">
 <span class="logo-badge">★</span>
 <span>MY BRAND</span>
+</div>
+<button id="couponBtn" class="btn btn-primary" disabled title="영상 시청 후 활성화">쿠폰받기</button>
+</div>
+</header>
+
+
+<!-- 중단: 영상(16:9) 카드 -->
+<main class="wrap">
+<section class="card">
+<h1>영상 시청 후 쿠폰을 받아보세요</h1>
+<p class="muted">영상 <strong id="needSec">10</strong>초 이상 시청하면 상단의 <strong>[쿠폰받기]</strong>가 활성화됩니다.</p>
+
+
+<div class="player-wrap">
+<div id="player" class="player"></div>
+<div id="overlay" class="overlay">
+<button id="startBtn" class="btn btn-primary" style="width:90%">▶︎ 시청 시작</button>
+</div>
+</div>
+
+
+<div class="progress" aria-label="시청 진행률"><div id="bar" class="bar"></div></div>
+</section>
+
+
+<div class="spacer"></div>
+</main>
+</div>
+
+
+<script>
+/******** 설정 ********/
+const VIDEO_ID = "M7lc1UVf-VE"; // 테스트용 영상 ID
+const WATCH_THRESHOLD_SECONDS = 10; // 요청: 10초
+const COUPON_TARGET_URL = "https://example.com/promo"; // 실제 이동 링크로 교체
+document.getElementById('needSec').textContent = WATCH_THRESHOLD_SECONDS;
+
+
+/******** 엘리먼트 ********/
+const $ = s=>document.querySelector(s);
+const overlay = $('#overlay');
+const startBtn = $('#startBtn');
+const bar = $('#bar');
+const couponBtn = $('#couponBtn');
+
+
+/******** YouTube IFrame API ********/
+let player, apiReady=false, watchTimer=null;
+let accumulated=0, lastTime=0, lastTickAt=0, rewarded=false;
+
+
+(function loadYT(){ const tag=document.createElement('script'); tag.src='https://www.youtube.com/iframe_api'; document.head.appendChild(tag); })();
+window.onYouTubeIframeAPIReady=()=>{
+apiReady=true;
+player=new YT.Player('player',{
+videoId:VIDEO_ID,
+width:'100%',height:'100%',
+playerVars:{controls:0,rel:0,fs:0,modestbranding:1,disablekb:1,playsinline:1},
+events:{onReady, onStateChange}
+});
+};
+
+
+function onReady(){ startBtn.disabled=false; }
+
+
+// 탭 이탈/포커스 아웃 시 정지
+document.addEventListener('visibilitychange',()=>{ if(document.hidden && player?.pauseVideo){ player.pauseVideo(); }});
+window.addEventListener('blur',()=>{ if(player?.pauseVideo){ player.pauseVideo(); }});
+
+
+startBtn.addEventListener('click',()=>{ if(!apiReady) return; overlay.style.display='none'; try{ player.playVideo(); }catch(e){} });
 </html>
