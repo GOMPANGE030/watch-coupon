@@ -37,12 +37,20 @@
     .muted{color:var(--muted);font-size:14px}
 
     /* 16:9 플레이어 */
-    /* 플레이어 16:9 */
     .player-wrap{position:relative;border-radius:12px;overflow:hidden;background:#000;margin-top:10px}
     .player{width:100%;aspect-ratio:16/9}
-    .overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(0deg, rgba(0,0,0,.5), rgba(0,0,0,.3));}
-    .sound{position:absolute;top:10px;right:10px;display:none;align-items:center;gap:6px;background:rgba(17,24,39,.72);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:8px 12px;font-size:13px;backdrop-filter:blur(6px);}
-    .sound:active{transform:scale(.98)}
+
+    /* 커스텀 플레이 버튼 오버레이 */
+    .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,.25));}
+    .overlay .play{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:min(160px,28%);aspect-ratio:1/1;border-radius:999px;
+      background:rgba(255,255,255,.06);backdrop-filter:blur(2px);
+      transition:transform .2s ease, opacity .4s ease;
+    }
+    .overlay .play img{width:100%;height:100%;object-fit:contain;display:block}
+    .overlay:active .play{transform:scale(.96)}
+    .overlay.fade{opacity:0;pointer-events:none;transition:opacity .4s ease}
 
     .progress{height:8px;background:#f1f5f9;border:1px solid var(--stroke);border-radius:999px;overflow:hidden;margin-top:12px}
     .bar{height:100%;width:0;background:linear-gradient(90deg,var(--cta-bg),#ffd29a)}
@@ -69,9 +77,9 @@
 
         <div class="player-wrap">
           <div id="player" class="player"></div>
-          <button id="unmuteBtn" class="sound" type="button">🔊 소리 켜기</button>
-          <div id="overlay" class="overlay">
-            <button id="fallbackPlay" class="btn btn-primary" style="width:90%">▶︎ 재생하기</button>
+          <!-- 커스텀 재생 버튼: play.png 필요 -->
+          <div id="overlay" class="overlay" role="button" aria-label="재생">
+            <span class="play"><img src="./play.png" alt="재생" /></span>
           </div>
         </div>
         <div class="progress" aria-label="시청 진행률"><div id="bar" class="bar"></div></div>
@@ -89,7 +97,7 @@
       HEADLINE_TEXT: '모든G 영상 시청하고 쿠폰도 받아보세요!',
       SUB_TEXT: '영상 전체를 시청하면 상단의 [쿠폰받기]가 활성화됩니다.',
       THEME: { bg:'#f9f9f9', text:'#111827', muted:'#6B7280', card:'#ffffff', stroke:'#e5e7eb', brand:'#ff6b00' },
-      CTA_COLOR: { bg:'#00ffb6', text:'#000000', bgDisabled:'#cffff0', textDisabled:'#6ea091' },
+      CTA_COLOR: { bg:'#00ffb6', text:'#ffffff', bgDisabled:'#cffff0', textDisabled:'#6ea091' },
       COUPON_TARGET_URL: 'https://example.com/promo',
       DEFAULT_VIDEO: 'LtL4BLlLNko'
     };
@@ -141,10 +149,8 @@
 
     // 엘리먼트
     const overlay = document.getElementById('overlay');
-    const fallbackPlay = document.getElementById('fallbackPlay');
     const bar = document.getElementById('bar');
     const couponBtn = document.getElementById('couponBtn');
-    const unmuteBtn = document.getElementById('unmuteBtn');
     const needSecEl = document.getElementById('needSec');
 
     // YouTube API 로드
@@ -157,40 +163,32 @@
       player=new YT.Player('player',{
         videoId:VIDEO_ID,
         width:'100%',height:'100%',
-        playerVars:{controls:0,rel:0,fs:0,modestbranding:1,disablekb:1,playsinline:1,autoplay:1, mute:1},
+        playerVars:{controls:0,rel:0,fs:0,modestbranding:1,disablekb:1,playsinline:1}, // 자동재생 X, 소리 On 준비
         events:{onReady, onStateChange}
       });
     };
 
     function onReady(){
+      // 전체 길이 표기
       setTimeout(()=>{ duration=Math.floor(player.getDuration()||0); if(duration>0){ needSecEl.textContent=duration; } }, 400);
-      try{ player.mute(); player.playVideo(); }catch(e){}
-      setTimeout(()=>{
-        const st = player.getPlayerState && player.getPlayerState();
-        if(st===YT.PlayerState.PLAYING || st===YT.PlayerState.BUFFERING){ overlay.style.display='none'; }
-        else { overlay.style.display='flex'; }
-        // 자동재생이 되었더라도 정책상 음소거이므로 '소리 켜기'를 안내
-        showUnmuteHint();
-      }, 600);
-    } }, 400);
-      try{ player.mute(); player.playVideo(); }catch(e){}
-      setTimeout(()=>{
-        const st = player.getPlayerState && player.getPlayerState();
-        if(st===YT.PlayerState.PLAYING || st===YT.PlayerState.BUFFERING){ overlay.style.display='none'; }
-        else { overlay.style.display='flex'; }
-      }, 600);
+      // 재생은 오버레이 클릭 시 수동 시작
     }
 
-    document.addEventListener('visibilitychange',()=>{ if(document.hidden && player?.pauseVideo){ player.pauseVideo(); }});
-    window.addEventListener('blur',()=>{ if(player?.pauseVideo){ player.pauseVideo(); }});
-    fallbackPlay.addEventListener('click',()=>{ try{ player.mute(); player.playVideo(); overlay.style.display='none'; }catch(e){} });
+    // 오버레이 클릭 → 재생 + 페이드아웃
+    overlay.addEventListener('click', ()=>{
+      if(!apiReady) return;
+      try{
+        player.unMute();
+        player.playVideo();
+      }catch{}
+      overlay.classList.add('fade');
+      overlay.addEventListener('transitionend', ()=>{ overlay.style.display='none'; }, {once:true});
+    });
 
+    // 상태 변화에 따른 처리
     function onStateChange(e){
       const S=YT.PlayerState;
-      if(e.data===S.PLAYING){ if(!watchTimer){ lastTime=player.getCurrentTime(); lastTickAt=performance.now(); watchTimer=setInterval(sample,250);} showUnmuteHint(); }
-      else if(e.data===S.PAUSED||e.data===S.BUFFERING){ clearInterval(watchTimer); watchTimer=null; }
-      else if(e.data===S.ENDED){ clearInterval(watchTimer); watchTimer=null; activateCoupon(); }
-    } }
+      if(e.data===S.PLAYING){ if(!watchTimer){ lastTime=player.getCurrentTime(); lastTickAt=performance.now(); watchTimer=setInterval(sample,250);} overlay.style.display = overlay.classList.contains('fade') ? 'none' : 'flex'; }
       else if(e.data===S.PAUSED||e.data===S.BUFFERING){ clearInterval(watchTimer); watchTimer=null; }
       else if(e.data===S.ENDED){ clearInterval(watchTimer); watchTimer=null; activateCoupon(); }
     }
@@ -214,21 +212,6 @@
     }
 
     couponBtn.addEventListener('click',()=>{ if(couponBtn.disabled) return; location.href = COUPON_URL; });
-
-    // --- 사운드 제어: 첫 사용자 제스처 또는 버튼으로 언뮤트 ---
-    function showUnmuteHint(){ try{ if(player && player.isMuted && player.isMuted()){ unmuteBtn.style.display='inline-flex'; } else { unmuteBtn.style.display='none'; } }catch{}}
-    function doUnmute(){
-      try{
-        player.unMute();
-        player.setVolume(100);
-        // 일부 브라우저는 언뮤트 후 재생 호출 필요
-        player.playVideo();
-        showUnmuteHint();
-      }catch{}
-    }
-    unmuteBtn.addEventListener('click', doUnmute);
-    // 페이지 내 첫 클릭에서 자동 언뮤트 시도 (정책 상 허용 범위)
-    document.addEventListener('click', function once(){ doUnmute(); document.removeEventListener('click', once); }, {capture:true});
   </script>
 </body>
 </html>
