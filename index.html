@@ -98,7 +98,7 @@
         bg: '#f9f9f9', text: '#111827', muted: '#6B7280', card: '#ffffff', stroke: '#e5e7eb', brand: '#ff6b00'
       },
       // ▶ 버튼 전용 색상 (원하면 THEME.brand와 다르게 설정)
-      CTA_COLOR: { bg: '#00ffb6', text: '#ffffff' },
+      CTA_COLOR: { bg: '#00ffb6', text: '#000000' },
 
       COUPON_TARGET_URL: 'https://example.com/promo', // 쿠폰 페이지 URL (아래 QP url= 로도 교체 가능)
       DEFAULT_VIDEO: 'LtL4BLlLNko'             // 기본 유튜브 영상(ID만)
@@ -143,7 +143,7 @@
     // CTA 색상 적용 (CONFIG + URL 파라미터로도 교체 가능)
     (function applyCTA(){
       const CTA_BG = Q.get('ctabg') || (CONFIG.CTA_COLOR && CONFIG.CTA_COLOR.bg) || '#00ffb6';
-      const CTA_TX = Q.get('ctatext') || (CONFIG.CTA_COLOR && CONFIG.CTA_COLOR.text) || '#ffffff';
+      const CTA_TX = Q.get('ctatext') || (CONFIG.CTA_COLOR && CONFIG.CTA_COLOR.text) || '#000000';
       const CTA_BG_D = Q.get('ctabgd') || (CONFIG.CTA_COLOR && CONFIG.CTA_COLOR.bgDisabled) || '#cffff0';
       const CTA_TX_D = Q.get('ctatextd') || (CONFIG.CTA_COLOR && CONFIG.CTA_COLOR.textDisabled) || '#6ea091';
       const r=document.documentElement;
