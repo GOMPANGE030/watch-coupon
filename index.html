@@ -75,8 +75,8 @@
 
         <div class="player-wrap">
           <div id="player" class="player"></div>
-          <div id="overlay" class="overlay">
-            <button id="startBtn" class="btn btn-primary" style="width:90%">▶︎ 시청 시작</button>
+          <div id="overlay" class="overlay" style="display:none">
+            <button id="fallbackPlay" class="btn btn-primary" style="width:90%">▶︎ 재생하기</button>
           </div>
         </div>
 
@@ -177,7 +177,7 @@
     /******** 시청 로직: "영상 전체"를 봐야 활성화 ********/
     const $ = s=>document.querySelector(s);
     const overlay = $('#overlay');
-    const startBtn = $('#startBtn');
+    const fallbackPlay = $('#fallbackPlay');
     const bar = $('#bar');
     const couponBtn = $('#couponBtn');
     const needSecEl = $('#needSec');
@@ -212,14 +212,14 @@
           document.getElementById('overlay').style.display='flex';
         }
       }, 400);
-      startBtn.disabled=false;
+      
     }
 
     // 탭 이탈/포커스 아웃 시 정지
     document.addEventListener('visibilitychange',()=>{ if(document.hidden && player?.pauseVideo){ player.pauseVideo(); }});
     window.addEventListener('blur',()=>{ if(player?.pauseVideo){ player.pauseVideo(); }});
 
-    startBtn.addEventListener('click',()=>{ if(!apiReady) return; overlay.style.display='none'; try{ player.playVideo(); }catch(e){} });
+    fallbackPlay.addEventListener('click',()=>{ if(!apiReady) return; overlay.style.display='none'; try{ player.mute(); player.playVideo(); }catch(e){} }); }catch(e){} });
 
     function onStateChange(e){
       const S=YT.PlayerState;
