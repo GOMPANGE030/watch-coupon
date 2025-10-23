@@ -27,7 +27,8 @@
       padding:clamp(10px,2.8vw,14px) clamp(12px,3.8vw,18px);
       font-weight:800;cursor:pointer;font-size:clamp(14px,3.8vw,16px);
       transition:transform .15s, box-shadow .2s, background .2s, opacity .2s; max-width:100%; white-space:nowrap}
-    .btn-primary{background:var(--cta-bg);color:var(--cta-text);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+    .btn-primary{background:var(--cta-bg); color:var(--cta-text); box-shadow:0 4px 14px rgba(0,0,0,.12)}
+    .btn-primary:not([disabled]){ color:#000 }                 /* 활성 시 글자색 #000 */
     .btn-primary[disabled]{background:var(--cta-bg-disabled);color:var(--cta-text-disabled);opacity:1;cursor:not-allowed}
     .btn-primary.active{box-shadow:0 0 0 3px rgba(17,24,39,.08),0 10px 28px rgba(0,0,0,.2);animation:pulse 1.4s ease-in-out infinite}
     @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
@@ -42,22 +43,19 @@
     .player{width:100%;aspect-ratio:16/9;position:relative;z-index:1}
     .player iframe{display:block;width:100%;height:100%;border:0;border-radius:12px}
 
-    /* 커스텀 오버레이(항상 iframe 위에 위치) */
+    /* 오버레이(항상 iframe 위) */
     .overlay{
       position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
       background:linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,.25));
-      z-index:5; /* ← 중요: iframe보다 위 */
-      transition:opacity .35s ease;
+      z-index:5; transition:opacity .35s ease;
     }
     .overlay.fade{opacity:0;pointer-events:none}
 
-    /* 재생 버튼 이미지(반응형, 절대 안 잘리게) */
+    /* 재생 이미지 버튼: 사각형 그대로, 반응형 */
     .play-img{
-      display:block;
-      width:clamp(84px, 26vw, 180px); /* 기본 크기 */
-      height:auto; max-width:90vw; max-height:60vh; object-fit:contain; border-radius:50%;
-      filter:drop-shadow(0 6px 24px rgba(0,0,0,.28));
-      transition:transform .15s ease;
+      display:block; width:clamp(84px, 26vw, 180px); height:auto;
+      max-width:90vw; max-height:60vh; object-fit:contain; border-radius:0;
+      filter:drop-shadow(0 6px 24px rgba(0,0,0,.28)); transition:transform .15s ease;
     }
     .overlay:active .play-img{transform:scale(.96)}
 
@@ -110,7 +108,7 @@
   </div>
 
   <script>
-    // ===== 설정(요청 반영된 기본값) =====
+    // ===== 설정(요청 반영) =====
     const CONFIG = {
       BRAND_NAME: '모든G, 다되G!',
       CTA_TEXT: '모든G 쿠폰받기',
@@ -119,7 +117,6 @@
       COUPON_TARGET_URL: 'https://example.com/promo',
       DEFAULT_VIDEO: 'LtL4BLlLNko'
     };
-
     const Q = new URLSearchParams(location.search);
     const parseVideoId = (val)=>{
       if(!val) return '';
@@ -133,16 +130,15 @@
     };
     const VIDEO_ID = parseVideoId(Q.get('video')||Q.get('vid')||Q.get('v')||CONFIG.DEFAULT_VIDEO);
     const COUPON_URL = Q.get('url') || CONFIG.COUPON_TARGET_URL;
-
     document.getElementById('brandName').textContent = Q.get('brand') || CONFIG.BRAND_NAME;
     document.getElementById('couponBtn').textContent = Q.get('cta') || CONFIG.CTA_TEXT;
     document.getElementById('headline').textContent = Q.get('h1') || CONFIG.HEADLINE_TEXT;
     document.getElementById('subcopy').textContent = Q.get('sub') || CONFIG.SUB_TEXT;
 
-    // ===== YouTube IFrame API 로드 =====
+    // ===== YouTube IFrame API =====
     let player, apiReady=false, watchTimer=null;
     let accumulated=0, lastTime=0, lastTickAt=0, rewarded=false, duration=0;
-    (function loadYT(){ const s=document.createElement('script'); s.src='https://www.youtube.com/iframe_api'; document.head.appendChild(s); })();
+    (function(){ const s=document.createElement('script'); s.src='https://www.youtube.com/iframe_api'; document.head.appendChild(s); })();
 
     window.onYouTubeIframeAPIReady=()=>{
       apiReady=true;
@@ -156,8 +152,6 @@
 
     function onReady(){
       setTimeout(()=>{ duration=Math.floor(player.getDuration()||0); if(duration>0){ document.getElementById('needSec').textContent=duration; }}, 300);
-      // 처음엔 오버레이가 클릭을 독점 (iframe 아래 z-index)
-      // 클릭 시 재생 로직은 아래 overlay 핸들러
     }
 
     // 오버레이 클릭 → 재생 + 페이드아웃
@@ -181,10 +175,9 @@
     }
 
     function sample(){
-      const now=performance.now();
-      const ct=player.getCurrentTime();
+      const now=performance.now(), ct=player.getCurrentTime();
       const dt=(now-lastTickAt)/1000; let dHead=ct-lastTime;
-      if(dHead>dt+0.75){ player.seekTo(lastTime,true); return; }
+      if(dHead>dt+0.75){ player.seekTo(lastTime,true); return; }   // 건너뛰기 방지
       if(dHead>0 && dHead<=dt+0.5){ accumulated+=Math.min(dHead,0.5); }
 
       const denom = duration>0 ? duration : Math.max(ct,1);
