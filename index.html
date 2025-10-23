@@ -6,7 +6,6 @@
   <title>모든G, 다되G! | 모든G 영상 시청하고 쿠폰도 받아보세요!</title>
   <style>
     :root{
-      --brand:#ff6b00; /* theme brand (unused for CTA; CTA has its own vars) */
       --bg:#f9f9f9; --text:#111827; --muted:#6B7280; --card:#ffffff; --stroke:#e5e7eb;
       --cta-bg:#00ffb6; --cta-text:#ffffff; --cta-bg-disabled:#cffff0; --cta-text-disabled:#6ea091;
     }
@@ -17,68 +16,62 @@
 
     .shell{min-height:100dvh;display:flex;flex-direction:column}
     .wrap{width:100%;max-width:720px;margin:0 auto;padding:0 calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left))}
-
-    header{position:sticky;top:0;z-index:10;background:rgba(249,249,249,.85);backdrop-filter:blur(6px);border-bottom:1px solid var(--stroke)}
-    .header{height:72px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 calc(14px + env(safe-area-inset-right)) 0 calc(14px + env(safe-area-inset-left))}
-    .logo{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.2px}
-    .logo-badge{width:32px;height:32px;border-radius:8px;background:#ff6b00;display:inline-flex;align-items:center;justify-content:center;color:#000;font-weight:900;overflow:hidden}
+    header{position:sticky;top:0;z-index:10;background:rgba(249,249,249,.9);backdrop-filter:blur(6px);border-bottom:1px solid var(--stroke)}
+    .header{height:72px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:0 calc(14px + env(safe-area-inset-right)) 0 calc(14px + env(safe-area-inset-left))}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:900}
+    .logo-badge{width:32px;height:32px;border-radius:8px;overflow:hidden}
     .logo-badge img{width:100%;height:100%;object-fit:cover;display:block}
 
-    .btn{appearance:none;border:0;border-radius:14px;padding:clamp(10px,2.8vw,14px) clamp(12px,3.8vw,18px);font-weight:800;cursor:pointer;font-size:clamp(14px,3.8vw,16px);transition:transform .15s ease, box-shadow .2s ease, background .2s ease, opacity .2s ease; max-width:100%; white-space:nowrap}
-    .btn-primary{background:var(--cta-bg);color:var(--cta-text);box-shadow:0 4px 14px rgba(0,0,0,.15)}
-    .btn-primary:active{transform:scale(.98)}
+    .btn{appearance:none;border:0;border-radius:14px;
+      padding:clamp(10px,2.8vw,14px) clamp(12px,3.8vw,18px);
+      font-weight:800;cursor:pointer;font-size:clamp(14px,3.8vw,16px);
+      transition:transform .15s, box-shadow .2s, background .2s, opacity .2s; max-width:100%; white-space:nowrap}
+    .btn-primary{background:var(--cta-bg);color:var(--cta-text);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+    .btn-primary[disabled]{background:var(--cta-bg-disabled);color:var(--cta-text-disabled);opacity:1;cursor:not-allowed}
     .btn-primary.active{box-shadow:0 0 0 3px rgba(17,24,39,.08),0 10px 28px rgba(0,0,0,.2);animation:pulse 1.4s ease-in-out infinite}
-    .btn-primary[disabled]{background:var(--cta-bg-disabled);color:var(--cta-text-disabled);opacity:1;cursor:not-allowed;filter:none}
-    @keyframes pulse{0%{transform:translateZ(0) scale(1)}50%{transform:translateZ(0) scale(1.04)}100%{transform:translateZ(0) scale(1)}}
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
 
     main{flex:1}
     .card{background:var(--card);border:1px solid var(--stroke);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.06);margin:16px 0;padding:18px}
     h1{font-size:20px;margin:0 0 8px}
     .muted{color:var(--muted);font-size:14px}
 
-    /* 16:9 플레이어 */
+    /* 플레이어 */
     .player-wrap{position:relative;border-radius:12px;overflow:hidden;background:#000;margin-top:10px}
     .player{width:100%;aspect-ratio:16/9;position:relative;z-index:1}
-    /* iOS Safari에서 유튜브 썸네일/버튼이 오버레이 위로 올라오는 현상 대응 */
-    .player iframe{display:block;width:100%;height:100%;pointer-events:none;border:0;border-radius:12px}
-    .player-wrap{position:relative}
-    .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,.25));z-index:3}
+    .player iframe{display:block;width:100%;height:100%;border:0;border-radius:12px}
 
-    /* 커스텀 플레이 버튼 오버레이 */
-    .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,.25));}
-    .overlay .play{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);backdrop-filter:blur(2px);transition:transform .2s ease, opacity .4s ease;padding:0;border-radius:999px}
-    /* 크기 제어는 img에 직접 적용 (iOS에서 aspect-ratio/percent가 일관적이지 않은 문제 대응) */
-    .overlay .play img{display:block;width:clamp(84px, 26vw, 180px);height:auto;max-width:90vw;max-height:60vh;object-fit:contain;border-radius:50%}aspect-ratio:1/1;border-radius:999px;
-      background:rgba(255,255,255,.06);backdrop-filter:blur(2px);
-      transition:transform .2s ease, opacity .4s ease;
-    }aspect-ratio:1/1;border-radius:999px;
-      background:rgba(255,255,255,.06);backdrop-filter:blur(2px);
-      transition:transform .2s ease, opacity .4s ease;
+    /* 커스텀 오버레이(항상 iframe 위에 위치) */
+    .overlay{
+      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,.25));
+      z-index:5; /* ← 중요: iframe보다 위 */
+      transition:opacity .35s ease;
     }
-    .overlay .play img{width:100%;height:100%;object-fit:contain;display:block}
-    .overlay:active .play{transform:scale(.96)}
-    .overlay.fade{opacity:0;pointer-events:none;transition:opacity .4s ease}
+    .overlay.fade{opacity:0;pointer-events:none}
+
+    /* 재생 버튼 이미지(반응형, 절대 안 잘리게) */
+    .play-img{
+      display:block;
+      width:clamp(84px, 26vw, 180px); /* 기본 크기 */
+      height:auto; max-width:90vw; max-height:60vh; object-fit:contain; border-radius:50%;
+      filter:drop-shadow(0 6px 24px rgba(0,0,0,.28));
+      transition:transform .15s ease;
+    }
+    .overlay:active .play-img{transform:scale(.96)}
 
     .progress{height:8px;background:#f1f5f9;border:1px solid var(--stroke);border-radius:999px;overflow:hidden;margin-top:12px}
     .bar{height:100%;width:0;background:linear-gradient(90deg,var(--cta-bg),#ffd29a)}
-
     .spacer{height:80px}
-  @media (max-width: 480px){
+
+    @media (max-width:480px){
       .header{height:66px}
-      .btn{border-radius:12px}
-      .btn-primary{box-shadow:0 3px 10px rgba(0,0,0,.12)}
-      /* 모바일에서 재생 아이콘 더 작게 */
-      .overlay .play img{width:clamp(72px, 22vw, 140px)}
+      .play-img{width:clamp(72px, 22vw, 140px)}
     }
-      .btn{border-radius:12px}
-      .btn-primary{box-shadow:0 3px 10px rgba(0,0,0,.12)}
-      .overlay .play{width:min(160px,44%)}
-    }
-    @media (max-width: 360px){
+    @media (max-width:360px){
       .header{height:62px}
-      .overlay .play img{width:clamp(64px, 24vw, 120px)}
-    }
-      .overlay .play{width:min(140px,48%)}
+      .play-img{width:clamp(64px, 24vw, 120px)}
     }
   </style>
 </head>
@@ -87,25 +80,29 @@
     <header>
       <div class="wrap header">
         <div class="logo">
-          <span class="logo-badge" id="logoBadge"><img src="./logo2.png" alt="logo" /></span>
+          <span class="logo-badge"><img src="./logo2.png" alt="logo" /></span>
           <span id="brandName">모든G, 다되G!</span>
         </div>
-        <button id="couponBtn" class="btn btn-primary" disabled title="영상 시청 후 활성화">모든G 쿠폰받기</button>
+        <button id="couponBtn" class="btn btn-primary" disabled>모든G 쿠폰받기</button>
       </div>
     </header>
 
     <main class="wrap">
       <section class="card">
         <h1 id="headline">모든G 영상 시청하고 쿠폰도 받아보세요!</h1>
-        <p class="muted"><span id="subcopy">영상 전체를 시청하면 상단의 [쿠폰받기]가 활성화됩니다.</span> <span class="muted" id="needSecWrap">(필요 시청: <strong id="needSec">-</strong>초)</span></p>
+        <p class="muted">
+          <span id="subcopy">영상 전체를 시청하면 상단의 [쿠폰받기]가 활성화됩니다.</span>
+          <span class="muted" id="needSecWrap">(필요 시청: <strong id="needSec">-</strong>초)</span>
+        </p>
 
         <div class="player-wrap">
           <div id="player" class="player"></div>
-          <!-- 커스텀 재생 버튼: play.png 필요 -->
+          <!-- 커스텀 재생 이미지 버튼 -->
           <div id="overlay" class="overlay" role="button" aria-label="재생">
-            <span class="play"><img src="./play.png" alt="재생" /></span>
+            <img src="./play.png" alt="재생" class="play-img" />
           </div>
         </div>
+
         <div class="progress" aria-label="시청 진행률"><div id="bar" class="bar"></div></div>
       </section>
       <div class="spacer"></div>
@@ -113,20 +110,16 @@
   </div>
 
   <script>
-    /******** 고정 설정 (요청값 반영) ********/
+    // ===== 설정(요청 반영된 기본값) =====
     const CONFIG = {
       BRAND_NAME: '모든G, 다되G!',
-      LOGO_IMG: './logo2.png',
       CTA_TEXT: '모든G 쿠폰받기',
       HEADLINE_TEXT: '모든G 영상 시청하고 쿠폰도 받아보세요!',
       SUB_TEXT: '영상 전체를 시청하면 상단의 [쿠폰받기]가 활성화됩니다.',
-      THEME: { bg:'#f9f9f9', text:'#111827', muted:'#6B7280', card:'#ffffff', stroke:'#e5e7eb', brand:'#ff6b00' },
-      CTA_COLOR: { bg:'#00ffb6', text:'#000000', bgDisabled:'#cffff0', textDisabled:'#6ea091' },
       COUPON_TARGET_URL: 'https://example.com/promo',
       DEFAULT_VIDEO: 'LtL4BLlLNko'
     };
 
-    // URL 파라미터로 값 덮어쓰기 지원
     const Q = new URLSearchParams(location.search);
     const parseVideoId = (val)=>{
       if(!val) return '';
@@ -139,92 +132,52 @@
       return val;
     };
     const VIDEO_ID = parseVideoId(Q.get('video')||Q.get('vid')||Q.get('v')||CONFIG.DEFAULT_VIDEO);
-    const BRAND_NAME = Q.get('brand') || CONFIG.BRAND_NAME;
-    const CTA_TEXT   = Q.get('cta')   || CONFIG.CTA_TEXT;
-    const HEADLINE   = Q.get('h1')    || CONFIG.HEADLINE_TEXT;
-    const SUB_TEXT   = Q.get('sub')   || CONFIG.SUB_TEXT;
-    const COUPON_URL = Q.get('url')   || CONFIG.COUPON_TARGET_URL;
+    const COUPON_URL = Q.get('url') || CONFIG.COUPON_TARGET_URL;
 
-    // 테마/CTA 컬러 적용
-    (function applyTheme(){
-      const r=document.documentElement;
-      const t=CONFIG.THEME;
-      r.style.setProperty('--bg', t.bg);
-      r.style.setProperty('--text', t.text);
-      r.style.setProperty('--muted', t.muted);
-      r.style.setProperty('--card', t.card);
-      r.style.setProperty('--stroke', t.stroke);
-      const CTA_BG = Q.get('ctabg') || CONFIG.CTA_COLOR.bg;
-      const CTA_TX = Q.get('ctatext') || CONFIG.CTA_COLOR.text;
-      const CTA_BG_D = Q.get('ctabgd') || CONFIG.CTA_COLOR.bgDisabled;
-      const CTA_TX_D = Q.get('ctatextd') || CONFIG.CTA_COLOR.textDisabled;
-      r.style.setProperty('--cta-bg', CTA_BG);
-      r.style.setProperty('--cta-text', CTA_TX);
-      r.style.setProperty('--cta-bg-disabled', CTA_BG_D);
-      r.style.setProperty('--cta-text-disabled', CTA_TX_D);
-    })();
+    document.getElementById('brandName').textContent = Q.get('brand') || CONFIG.BRAND_NAME;
+    document.getElementById('couponBtn').textContent = Q.get('cta') || CONFIG.CTA_TEXT;
+    document.getElementById('headline').textContent = Q.get('h1') || CONFIG.HEADLINE_TEXT;
+    document.getElementById('subcopy').textContent = Q.get('sub') || CONFIG.SUB_TEXT;
 
-    // 텍스트/로고 반영
-    document.getElementById('brandName').textContent = BRAND_NAME;
-    document.getElementById('couponBtn').textContent = CTA_TEXT;
-    document.getElementById('headline').textContent = HEADLINE;
-    document.getElementById('subcopy').textContent = SUB_TEXT;
-    if(CONFIG.LOGO_IMG){ document.getElementById('logoBadge').innerHTML = `<img src="${CONFIG.LOGO_IMG}" alt="logo" />`; }
-
-    // 엘리먼트
-    const overlay = document.getElementById('overlay');
-    const bar = document.getElementById('bar');
-    let playerIframe = null;
-    const couponBtn = document.getElementById('couponBtn');
-    const needSecEl = document.getElementById('needSec');
-
-    // YouTube API 로드
+    // ===== YouTube IFrame API 로드 =====
     let player, apiReady=false, watchTimer=null;
-    let accumulated=0, lastTime=0, lastTickAt=0, rewarded=false;
-    let duration=0; // 전체 길이(초)
-    (function loadYT(){ const tag=document.createElement('script'); tag.src='https://www.youtube.com/iframe_api'; document.head.appendChild(tag); })();
+    let accumulated=0, lastTime=0, lastTickAt=0, rewarded=false, duration=0;
+    (function loadYT(){ const s=document.createElement('script'); s.src='https://www.youtube.com/iframe_api'; document.head.appendChild(s); })();
+
     window.onYouTubeIframeAPIReady=()=>{
       apiReady=true;
       player=new YT.Player('player',{
         videoId:VIDEO_ID,
         width:'100%',height:'100%',
-        playerVars:{controls:0,rel:0,fs:0,modestbranding:1,disablekb:1,playsinline:1},
+        playerVars:{controls:1,rel:0,fs:0,modestbranding:1,disablekb:1,playsinline:1}, // 수동 재생
         events:{onReady, onStateChange}
       });
     };
 
     function onReady(){
-      // 전체 길이 표기
-      setTimeout(()=>{ duration=Math.floor(player.getDuration()||0); if(duration>0){ needSecEl.textContent=duration; } }, 400);
-      // iframe 참조 후 초기에는 클릭을 오버레이가 독점하도록 차단
-      try{ playerIframe = player.getIframe(); if(playerIframe){ playerIframe.style.pointerEvents='none'; } }catch{}
-      // 재생은 오버레이 클릭 시 수동 시작
-    } }, 400);
-      // 재생은 오버레이 클릭 시 수동 시작
+      setTimeout(()=>{ duration=Math.floor(player.getDuration()||0); if(duration>0){ document.getElementById('needSec').textContent=duration; }}, 300);
+      // 처음엔 오버레이가 클릭을 독점 (iframe 아래 z-index)
+      // 클릭 시 재생 로직은 아래 overlay 핸들러
     }
 
     // 오버레이 클릭 → 재생 + 페이드아웃
+    const overlay = document.getElementById('overlay');
     overlay.addEventListener('click', ()=>{
       if(!apiReady) return;
-      try{
-        player.unMute();
-        player.playVideo();
-      }catch{}
+      try{ player.unMute?.(); player.playVideo?.(); }catch{}
       overlay.classList.add('fade');
-      overlay.addEventListener('transitionend', ()=>{ 
-        overlay.style.display='none';
-        // 재생 시작 후에는 유튜브 플레이어와 상호작용 가능하도록 이벤트 복구
-        if(playerIframe){ playerIframe.style.pointerEvents='auto'; }
-      }, {once:true});
-    });
+      overlay.addEventListener('transitionend', ()=>{ overlay.style.display='none'; }, {once:true});
     });
 
-    // 상태 변화에 따른 처리
     function onStateChange(e){
       const S=YT.PlayerState;
-      if(e.data===S.PLAYING){ if(!watchTimer){ lastTime=player.getCurrentTime(); lastTickAt=performance.now(); watchTimer=setInterval(sample,250);} overlay.style.display = overlay.classList.contains('fade') ? 'none' : 'flex'; }
-      else if(e.data===S.PAUSED||e.data===S.BUFFERING){ clearInterval(watchTimer); watchTimer=null; }
-      else if(e.data===S.ENDED){ clearInterval(watchTimer); watchTimer=null; activateCoupon(); }
+      if(e.data===S.PLAYING){
+        if(!watchTimer){ lastTime=player.getCurrentTime(); lastTickAt=performance.now(); watchTimer=setInterval(sample,250); }
+      }else if(e.data===S.PAUSED||e.data===S.BUFFERING){
+        clearInterval(watchTimer); watchTimer=null;
+      }else if(e.data===S.ENDED){
+        clearInterval(watchTimer); watchTimer=null; activateCoupon();
+      }
     }
 
     function sample(){
@@ -233,19 +186,26 @@
       const dt=(now-lastTickAt)/1000; let dHead=ct-lastTime;
       if(dHead>dt+0.75){ player.seekTo(lastTime,true); return; }
       if(dHead>0 && dHead<=dt+0.5){ accumulated+=Math.min(dHead,0.5); }
+
       const denom = duration>0 ? duration : Math.max(ct,1);
       const done = Math.min(accumulated, denom);
-      bar.style.width = `${(done/denom)*100}%`;
+      document.getElementById('bar').style.width = `${(done/denom)*100}%`;
+
       if(duration>0 && !rewarded && accumulated >= duration - 0.5){ activateCoupon(); }
       lastTime=ct; lastTickAt=now;
     }
 
     function activateCoupon(){
       if(rewarded) return; rewarded=true;
-      couponBtn.disabled=false; couponBtn.classList.add('active'); couponBtn.focus();
+      const btn = document.getElementById('couponBtn');
+      btn.disabled=false; btn.classList.add('active'); btn.focus();
     }
 
-    couponBtn.addEventListener('click',()=>{ if(couponBtn.disabled) return; location.href = COUPON_URL; });
+    document.getElementById('couponBtn').addEventListener('click',()=>{
+      const btn = document.getElementById('couponBtn');
+      if(btn.disabled) return;
+      location.href = COUPON_URL;
+    });
   </script>
 </body>
 </html>
