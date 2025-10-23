@@ -25,7 +25,7 @@
     .logo-badge img{width:100%;height:100%;object-fit:cover;display:block}
 
     .btn{appearance:none;border:0;border-radius:14px;padding:14px 18px;font-weight:800;cursor:pointer;font-size:16px;transition:transform .15s ease, box-shadow .2s ease, background .2s ease, opacity .2s ease}
-    .btn-primary{background:var(--cta-bg, var(--brand));color:var(--cta-text, #fff);box-shadow:0 4px 14px color-mix(in srgb, var(--cta-bg, var(--brand)) 45%, transparent)}
+    .btn-primary{background:var(--cta-bg);color:var(--cta-text);box-shadow:0 4px 14px rgba(0,0,0,.15)}
     .btn-primary:active{transform:scale(.98)}
     /* 활성화 강조(shine + pulse + ring) */
     .btn-primary.active{position:relative;box-shadow:0 0 0 4px color-mix(in srgb, var(--cta-bg) 25%, #fff 0%),0 12px 28px color-mix(in srgb, var(--cta-bg) 55%, transparent);animation:pulse 1.4s ease-in-out infinite}
@@ -33,7 +33,7 @@
     @keyframes shine{to{transform:translateX(120%)}}
     @keyframes pulse{0%{transform:translateZ(0) scale(1)}50%{transform:translateZ(0) scale(1.04)}100%{transform:translateZ(0) scale(1)}}
     .btn-primary:active{transform:scale(.98)}
-    .btn[disabled]{opacity:.5;cursor:not-allowed;filter:grayscale(.2)}
+    .btn-primary[disabled]{background:var(--cta-bg-disabled);color:var(--cta-text-disabled);opacity:1;cursor:not-allowed;filter:none}
     .btn-primary.active{box-shadow:0 0 0 3px rgba(17,24,39,.08),0 10px 28px rgba(255,107,0,.45);animation:pulse 1.4s ease-in-out infinite}
     @keyframes pulse{0%{transform:translateZ(0) scale(1)}50%{transform:translateZ(0) scale(1.04)}100%{transform:translateZ(0) scale(1)}}
 
@@ -52,8 +52,6 @@
     .bar{height:100%;width:0;background:linear-gradient(90deg,var(--brand),#ffd29a)}
 
     .spacer{height:80px}
-
-    /* 버튼 색상 변
   .btn-primary.boost{animation:pop .5s ease}
     @keyframes pop{0%{transform:scale(.96)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
   </style>
@@ -91,16 +89,16 @@
   <script>
     /******** 쉽게 바꾸는 설정 ********/
     const CONFIG = {
-      BRAND_NAME: '모든G, 다되G',                  // 상단 텍스트
+      BRAND_NAME: '모든G, 다되G!',                  // 상단 텍스트
       LOGO_IMG: './logo2.png',                            // 로고 이미지 PNG 경로(예: './logo.png')
       CTA_TEXT: '모든G 쿠폰받기',                     // 헤더 버튼 문구
-      HEADLINE_TEXT: '모든G 영상도 보고 쿠폰도 받아보세요!',
-      SUB_TEXT: '영상 전체를 시청하면 상단의 [모든G 쿠폰받기]가 활성화됩니다!',
+      HEADLINE_TEXT: '모든G 영상 시청하고 쿠폰도 받아보세요!',
+      SUB_TEXT: '영상 전체를 시청하면 상단의 [쿠폰받기]가 활성화됩니다.',
       THEME: {                                 // 사이트 전반 색상
         bg: '#f9f9f9', text: '#111827', muted: '#6B7280', card: '#ffffff', stroke: '#e5e7eb', brand: '#ff6b00'
       },
       // ▶ 버튼 전용 색상 (원하면 THEME.brand와 다르게 설정)
-      CTA_COLOR: { bg: '#ff6b00', text: '#ffffff' },
+      CTA_COLOR: { bg: '#00ffb6', text: '#ffffff' },
 
       COUPON_TARGET_URL: 'https://example.com/promo', // 쿠폰 페이지 URL (아래 QP url= 로도 교체 가능)
       DEFAULT_VIDEO: 'LtL4BLlLNko'             // 기본 유튜브 영상(ID만)
@@ -144,7 +142,20 @@
 
     // CTA 색상 적용 (CONFIG + URL 파라미터로도 교체 가능)
     (function applyCTA(){
-      const CTA_BG = Q.get('ctabg') || (CONFIG.CTA_COLOR && CONFIG.CTA_COLOR.bg) || getComputedStyle(document.documentElement).getPropertyValue('--brand') || '#00ffb6';
+      const CTA_BG = Q.get('ctabg') || (CONFIG.CTA_COLOR && CONFIG.CTA_COLOR.bg) || '#00ffb6';
+      const CTA_TX = Q.get('ctatext') || (CONFIG.CTA_COLOR && CONFIG.CTA_COLOR.text) || '#ffffff';
+      const CTA_BG_D = Q.get('ctabgd') || (CONFIG.CTA_COLOR && CONFIG.CTA_COLOR.bgDisabled) || '#cffff0';
+      const CTA_TX_D = Q.get('ctatextd') || (CONFIG.CTA_COLOR && CONFIG.CTA_COLOR.textDisabled) || '#6ea091';
+      const r=document.documentElement;
+      r.style.setProperty('--cta-bg', String(CTA_BG).trim());
+      r.style.setProperty('--cta-text', String(CTA_TX).trim());
+      r.style.setProperty('--cta-bg-disabled', String(CTA_BG_D).trim());
+      r.style.setProperty('--cta-text-disabled', String(CTA_TX_D).trim());
+    })();
+
+    // CTA 색상 적용 (CONFIG + URL 파라미터로도 교체 가능)
+    (function applyCTA(){
+      const CTA_BG = Q.get('ctabg') || (CONFIG.CTA_COLOR && CONFIG.CTA_COLOR.bg) || getComputedStyle(document.documentElement).getPropertyValue('--brand') || '#ff6b00';
       const CTA_TX = Q.get('ctatext') || (CONFIG.CTA_COLOR && CONFIG.CTA_COLOR.text) || '#ffffff';
       const r=document.documentElement;
       r.style.setProperty('--cta-bg', CTA_BG.trim());
@@ -181,17 +192,26 @@
       player=new YT.Player('player',{
         videoId:VIDEO_ID,
         width:'100%',height:'100%',
-        playerVars:{controls:0,rel:0,fs:0,modestbranding:1,disablekb:1,playsinline:1},
+        playerVars:{controls:0,rel:0,fs:0,modestbranding:1,disablekb:1,playsinline:1,autoplay:1, mute:1},
         events:{onReady, onStateChange}
       });
     };
 
     function onReady(){
-      // 메타데이터에서 전체 길이 확인
+      // 전체 길이 세팅
+      setTimeout(()=>{ duration=Math.floor(player.getDuration()||0); if(duration>0){ document.getElementById('needSec').textContent=duration; } }, 250);
+      // 자동재생 시도 (정책상 무음이어야 동작. 이미 playerVars.mute=1)
+      try{ player.mute(); player.playVideo(); }catch(e){}
+      // 재생 상태 확인 후 오버레이 처리
       setTimeout(()=>{
-        duration = Math.floor(player.getDuration()||0);
-        if(duration>0){ needSecEl.textContent = duration; }
-      }, 250);
+        const state = player.getPlayerState && player.getPlayerState();
+        if(state===YT.PlayerState.PLAYING || state===YT.PlayerState.BUFFERING){
+          document.getElementById('overlay').style.display='none';
+        } else {
+          // 자동재생 실패 시 수동 시작 버튼 노출
+          document.getElementById('overlay').style.display='flex';
+        }
+      }, 400);
       startBtn.disabled=false;
     }
 
