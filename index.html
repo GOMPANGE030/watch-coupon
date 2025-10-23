@@ -38,7 +38,11 @@
 
     /* 16:9 플레이어 */
     .player-wrap{position:relative;border-radius:12px;overflow:hidden;background:#000;margin-top:10px}
-    .player{width:100%;aspect-ratio:16/9}
+    .player{width:100%;aspect-ratio:16/9;position:relative;z-index:1}
+    /* iOS Safari에서 유튜브 썸네일/버튼이 오버레이 위로 올라오는 현상 대응 */
+    .player iframe{display:block;width:100%;height:100%;pointer-events:none;border:0;border-radius:12px}
+    .player-wrap{position:relative}
+    .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,.25));z-index:3}
 
     /* 커스텀 플레이 버튼 오버레이 */
     .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,.25));}
@@ -170,6 +174,7 @@
     // 엘리먼트
     const overlay = document.getElementById('overlay');
     const bar = document.getElementById('bar');
+    let playerIframe = null;
     const couponBtn = document.getElementById('couponBtn');
     const needSecEl = document.getElementById('needSec');
 
@@ -183,7 +188,7 @@
       player=new YT.Player('player',{
         videoId:VIDEO_ID,
         width:'100%',height:'100%',
-        playerVars:{controls:0,rel:0,fs:0,modestbranding:1,disablekb:1,playsinline:1}, // 자동재생 X, 소리 On 준비
+        playerVars:{controls:0,rel:0,fs:0,modestbranding:1,disablekb:1,playsinline:1},
         events:{onReady, onStateChange}
       });
     };
@@ -191,6 +196,10 @@
     function onReady(){
       // 전체 길이 표기
       setTimeout(()=>{ duration=Math.floor(player.getDuration()||0); if(duration>0){ needSecEl.textContent=duration; } }, 400);
+      // iframe 참조 후 초기에는 클릭을 오버레이가 독점하도록 차단
+      try{ playerIframe = player.getIframe(); if(playerIframe){ playerIframe.style.pointerEvents='none'; } }catch{}
+      // 재생은 오버레이 클릭 시 수동 시작
+    } }, 400);
       // 재생은 오버레이 클릭 시 수동 시작
     }
 
@@ -202,7 +211,12 @@
         player.playVideo();
       }catch{}
       overlay.classList.add('fade');
-      overlay.addEventListener('transitionend', ()=>{ overlay.style.display='none'; }, {once:true});
+      overlay.addEventListener('transitionend', ()=>{ 
+        overlay.style.display='none';
+        // 재생 시작 후에는 유튜브 플레이어와 상호작용 가능하도록 이벤트 복구
+        if(playerIframe){ playerIframe.style.pointerEvents='auto'; }
+      }, {once:true});
+    });
     });
 
     // 상태 변화에 따른 처리
